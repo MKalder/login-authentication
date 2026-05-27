@@ -1,2 +1,4 @@
 .env
 */demo
+*/node_modules
+*config.js

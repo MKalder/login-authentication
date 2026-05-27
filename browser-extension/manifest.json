@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "Login Authentication MVP",
+  "version": "1.0",
+  "description": "Register & Login",
+  "permissions": ["activeTab", "scripting", "storage", "contextMenus"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ],
+  "action": {}
+}
