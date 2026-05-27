@@ -1,10 +1,9 @@
 import { Pool } from 'pg';
-import { config } from '../config.js';
-import { createRequire } from 'module';
+import { DATABASE_URL } from '../config/env.js';
 
-console.log(config.db);
-
-const pool = new Pool(config.db);
+const pool = new Pool({
+    connectionString: DATABASE_URL,
+});
 
 export default {
     query: (text, params) => pool.query(text, params),
