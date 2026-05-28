@@ -11,7 +11,7 @@ const transporter = nodemailer.createTransport({
 });
 
 export const sendVerificationMail = async (email, token) => {
-    // Der Link wird im auth.service zusammengebaut
+    // Link is build in auth.service
     await transporter.sendMail({
         from: MAIL_FROM,
         to: email,
