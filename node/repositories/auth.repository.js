@@ -1,5 +1,13 @@
 import db from '../db/index.js';
 
+const findUserById = async (id) => {
+    const result = await db.query(
+        'SELECT id, email, is_verified, created_at FROM users WHERE id = $1',
+        [id]
+    );
+    return result.rows[0] || null;
+};
+
 const findUserByEmail = async (email) => {
     const result = await db.query(
         'SELECT id, email, password_hash, is_verified FROM users WHERE email = $1',
@@ -53,5 +61,6 @@ export default {
     createVerificationToken,
     findVerificationToken,
     markTokenAsUsed,
-    verifyUser
+    verifyUser,
+    findUserById
 };
