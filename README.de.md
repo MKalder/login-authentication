@@ -57,13 +57,14 @@ Das Backend kontrolliert alles.
 
 ## 🧰 Tech Stack
 
-| Bereich   | Technologie                    |
-| --------- | ------------------------------ |
-| Frontend  | Vanilla JS (Browser Extension) |
-| Backend   | Node.js + Express              |
-| Datenbank | PostgreSQL                     |
-| Auth      | JWT + bcrypt                   |
-| E-Mail    | Nodemailer                     |
+| Bereich       | Technologie                    |
+| ------------- | ------------------------------ |
+| Frontend      | Vanilla JS (Browser Extension) |
+| Reverse Proxy | NGINX                          |
+| Backend       | Node.js + Express              |
+| Datenbank     | PostgreSQL                     |
+| Auth          | JWT + bcrypt                   |
+| E-Mail        | Nodemailer                     |
 
 ---
 
@@ -121,8 +122,8 @@ popup.html
 
 ## 📚 Lernreihenfolge
 
-1. Registrierung + Passwort-Hashing
-2. E-Mail-Verifizierung
+1. Registrierung + Passwort-Hashing ✅
+2. E-Mail-Verifizierung ✅
 3. Login + JWT
 4. Protected Routes (Middleware)
 5. Forgot Password Flow
@@ -134,7 +135,7 @@ popup.html
 
 ## 🚀 Setup
 
-tbd
+tbd...
 
 ---
 
