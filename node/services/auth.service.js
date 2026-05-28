@@ -3,6 +3,8 @@ import crypto from 'crypto';
 import authRepository from '../repositories/auth.repository.js';
 import { sendVerificationMail } from './mail.service.js';
 import { APP_URL } from '../config/env.js';
+import jwt from 'jsonwebtoken';
+import { JWT_SECRET } from '../config/env.js';
 
 const register = async (email, password) => {
     const existing = await authRepository.findUserByEmail(email);
@@ -54,4 +56,33 @@ const verifyEmail = async (raw_token) => {
     await authRepository.markTokenAsUsed(token.id);
 };
 
-export default { register, verifyEmail };
+const login = async (email, password) => {
+    // 1. Search user
+    const user = await authRepository.findUserByEmail(email);
+    if (!user) {
+        throw new Error('INVALID_CREDENTIALS');
+    }
+
+    // 2. E-Mail verified?
+    if (!user.is_verified) {
+        throw new Error('EMAIL_NOT_VERIFIED');
+    }
+
+    // 3. Password check
+    const isValid = await bcrypt.compare(password, user.password_hash);
+    if (!isValid) {
+        throw new Error('INVALID_CREDENTIALS');
+    }
+
+    // 4. Create JWT 
+    const token = jwt.sign(
+        { userId: user.id, email: user.email },
+        JWT_SECRET,
+        { expiresIn: '15m' }
+    );
+
+    return { token, user: { id: user.id, email: user.email } };
+};
+
+export default { register, verifyEmail, login };
+
