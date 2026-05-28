@@ -2,7 +2,8 @@ import db from '../db/index.js';
 
 const findUserByEmail = async (email) => {
     const result = await db.query(
-        'SELECT id FROM users WHERE email = $1', [email]
+        'SELECT id, email, password_hash, is_verified FROM users WHERE email = $1',
+        [email]
     );
     return result.rows[0] || null;
 };

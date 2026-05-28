@@ -124,12 +124,43 @@ popup.html
 
 1. Registrierung + Passwort-Hashing ✅
 2. E-Mail-Verifizierung ✅
-3. Login + JWT
+3. Login + JWT ✅
 4. Protected Routes (Middleware)
 5. Forgot Password Flow
 6. Password Change
 7. _(später)_ Refresh Tokens
 8. _(später)_ OAuth / SSO
+9. _(später)_ html pages
+10. _(später)_ Online Bereitstellung
+
+---
+
+## ⚙️ Authentifizierungs Fluss
+
+```txt
+POST /auth/login
+  → E-Mail + Passwort aus Body lesen
+  → User in DB suchen
+  → Existiert nicht? → 401
+  → is_verified = false? → 403
+  → bcrypt.compare(passwort, hash)
+  → falsch? → 401
+  → JWT erstellen mit { userId, email }
+  → JWT zurückschicken
+```
+
+---
+
+# 💾 Speicherung von Tokens in Web-Apps
+
+Zur Vollständigkeit: In einer Web-App gibt es drei gängige Optionen, einen Token zu speichern.
+
+| Ort                    | Sicher? | Problem                                                     |
+| ---------------------- | ------- | ----------------------------------------------------------- |
+| `localStorage`         | Nein    | Angreifbar via XSS                                          |
+| `sessionStorage`       | Nein    | Ebenfalls XSS-anfällig                                      |
+| `httpOnly Cookie`      | Ja      | Server setzt Cookie, JavaScript kann nicht darauf zugreifen |
+| `chrome.storage.local` | Ja      | Nur in Browser Extensions verfügbar                         |
 
 ---
 
