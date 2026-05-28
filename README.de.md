@@ -39,7 +39,6 @@ Das Backend kontrolliert alles.
 
 ### Phase 2 — Security Basics
 
-- [ ] Logout
 - [ ] Passwort vergessen (Reset-Link + Token)
 - [ ] Passwort zurücksetzen (Reset-Token einlösen)
 - [ ] Passwort ändern (altes Passwort prüfen)
@@ -52,19 +51,21 @@ Das Backend kontrolliert alles.
 - [ ] Multi-Device Login
 - [ ] OAuth / Google Login
 - [ ] Two-Factor Authentication (2FA)
+- [ ] Webseiten / Browser Plugin
+- [ ] Logout
 
 ---
 
 ## 🧰 Tech Stack
 
-| Bereich       | Technologie                    |
-| ------------- | ------------------------------ |
-| Frontend      | Vanilla JS (Browser Extension) |
-| Reverse Proxy | NGINX                          |
-| Backend       | Node.js + Express              |
-| Datenbank     | PostgreSQL                     |
-| Auth          | JWT + bcrypt                   |
-| E-Mail        | Nodemailer                     |
+| Bereich       | Technologie       |
+| ------------- | ----------------- |
+| Frontend      | Vanilla JS        |
+| Reverse Proxy | NGINX             |
+| Backend       | Node.js + Express |
+| Datenbank     | PostgreSQL        |
+| Auth          | JWT + bcrypt      |
+| E-Mail        | Nodemailer        |
 
 ---
 
