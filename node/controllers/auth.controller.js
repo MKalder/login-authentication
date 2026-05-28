@@ -70,4 +70,17 @@ const login = async (req, res) => {
     }
 };
 
-export default { register, verifyEmail, login };
+const me = async (req, res) => {
+    try {
+        const user = await authService.me(req.user.userId);
+        return res.status(200).json({ user });
+    } catch (err) {
+        if (err.message === 'USER_NOT_FOUND') {
+            return res.status(404).json({ error: 'User nicht gefunden.' });
+        }
+        console.error(err);
+        return res.status(500).json({ error: 'Serverfehler.' });
+    }
+};
+
+export default { register, verifyEmail, login, me };

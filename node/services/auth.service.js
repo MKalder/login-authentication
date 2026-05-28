@@ -84,5 +84,13 @@ const login = async (email, password) => {
     return { token, user: { id: user.id, email: user.email } };
 };
 
-export default { register, verifyEmail, login };
+const me = async (userId) => {
+    const user = await authRepository.findUserById(userId);
+    if (!user) {
+        throw new Error('USER_NOT_FOUND');
+    }
+    return user;
+};
+
+export default { register, verifyEmail, login, me };
 

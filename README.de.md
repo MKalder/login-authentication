@@ -31,15 +31,15 @@ Das Backend kontrolliert alles.
 
 ### Phase 1 — Basis-Auth
 
-- [ ] Registrierung (E-Mail + Passwort)
-- [ ] Passwort-Hashing mit bcrypt
-- [ ] E-Mail-Verifizierung (Token + Mail)
-- [ ] Login + JWT erzeugen
-- [ ] Geschützte Routen (Auth Middleware)
-- [ ] Logout
+- ✅ Registrierung (E-Mail + Passwort)
+- ✅ Passwort-Hashing mit bcrypt
+- ✅ E-Mail-Verifizierung (Token + Mail)
+- ✅ Login + JWT erzeugen
+- ✅ Geschützte Routen (Auth Middleware)
 
 ### Phase 2 — Security Basics
 
+- [ ] Logout
 - [ ] Passwort vergessen (Reset-Link + Token)
 - [ ] Passwort zurücksetzen (Reset-Token einlösen)
 - [ ] Passwort ändern (altes Passwort prüfen)
@@ -125,7 +125,7 @@ popup.html
 1. Registrierung + Passwort-Hashing ✅
 2. E-Mail-Verifizierung ✅
 3. Login + JWT ✅
-4. Protected Routes (Middleware)
+4. Protected Routes (Middleware) ✅
 5. Forgot Password Flow
 6. Password Change
 7. _(später)_ Refresh Tokens
