@@ -133,6 +133,22 @@ popup.html
 
 ---
 
+## Authentifizierungs Fluss
+
+```txt
+POST /auth/login
+  → E-Mail + Passwort aus Body lesen
+  → User in DB suchen
+  → Existiert nicht? → 401
+  → is_verified = false? → 403
+  → bcrypt.compare(passwort, hash)
+  → falsch? → 401
+  → JWT erstellen mit { userId, email }
+  → JWT zurückschicken
+```
+
+---
+
 ## 🚀 Setup
 
 tbd...
