@@ -1,10 +1,10 @@
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import authRepository from '../repositories/auth.repository.js';
-import { sendVerificationMail } from './mail.service.js';
 import { APP_URL } from '../config/env.js';
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from '../config/env.js';
+import { sendVerificationMail, sendPasswordResetMail } from './mail.service.js';
 
 const register = async (email, password) => {
     const existing = await authRepository.findUserByEmail(email);
@@ -92,5 +92,44 @@ const me = async (userId) => {
     return user;
 };
 
-export default { register, verifyEmail, login, me };
+const forgotPassword = async (email) => {
+    const user = await authRepository.findUserByEmail(email);
+
+    // Bewusst keine Fehlermeldung — User-Enumeration verhindern
+    if (!user || !user.is_verified) return;
+
+    const rawToken = crypto.randomBytes(32).toString('hex');
+    const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 Minuten
+
+    await authRepository.createPasswordResetToken(user.id, tokenHash, expiresAt);
+
+    const resetLink = `${APP_URL}/auth/reset-password?token=${rawToken}`;
+    await sendPasswordResetMail(email, resetLink);
+};
+
+const resetPassword = async (rawToken, newPassword) => {
+    const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+
+    const token = await authRepository.findPasswordResetToken(tokenHash);
+    if (!token) {
+        throw new Error('TOKEN_INVALID');
+    }
+
+    if (token.used_at) {
+        throw new Error('TOKEN_USED');
+    }
+
+    if (new Date() > new Date(token.expires_at)) {
+        throw new Error('TOKEN_EXPIRED');
+    }
+
+    const password_hash = await bcrypt.hash(newPassword, 12);
+
+    await authRepository.updatePassword(token.user_id, password_hash);
+    await authRepository.markResetTokenAsUsed(token.id);
+};
+
+export default { register, verifyEmail, login, me, forgotPassword, resetPassword };
+
 

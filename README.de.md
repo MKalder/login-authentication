@@ -136,7 +136,7 @@ popup.html
 
 ---
 
-## ⚙️ Authentifizierungs Fluss
+## ⚙️ Authentifizierung
 
 ```txt
 POST /auth/login
@@ -148,6 +148,30 @@ POST /auth/login
   → falsch? → 401
   → JWT erstellen mit { userId, email }
   → JWT zurückschicken
+```
+
+---
+
+## ⚙️ Passwort vergessen
+
+```txt
+POST /forgot-password
+  → E-Mail aus Body lesen
+  → User suchen + is_verified prüfen
+  → nicht gefunden oder nicht verifiziert? → trotzdem 200 zurückgeben
+  → rawToken generieren + SHA256-Hash bilden
+  → Hash + expires_at in password_reset_tokens speichern
+  → Mail mit Link: /reset-password?token=RAW_TOKEN senden
+
+POST /reset-password
+  → token + newPassword aus Body lesen
+  → SHA256(token) bilden
+  → Hash in DB suchen → nicht gefunden? → 400
+  → used_at gesetzt? → 400
+  → expires_at überschritten? → 400
+  → bcrypt.hash(newPassword)
+  → users.password_hash aktualisieren
+  → used_at = NOW()
 ```
 
 ---
@@ -167,7 +191,9 @@ Zur Vollständigkeit: In einer Web-App gibt es drei gängige Optionen, einen Tok
 
 ## 🚀 Setup
 
-tbd...
+### Lokal
+
+### VPS
 
 ---
 

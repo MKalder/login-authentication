@@ -24,3 +24,18 @@ export const sendVerificationMail = async (email, token) => {
         `,
     });
 };
+
+export const sendPasswordResetMail = async (email, resetLink) => {
+    await transporter.sendMail({
+        from: MAIL_FROM,
+        to: email,
+        subject: 'Passwort zurücksetzen',
+        html: `
+            <h2>Passwort zurücksetzen</h2>
+            <p>Klicke auf den Link um ein neues Passwort zu vergeben:</p>
+            <a href="${resetLink}">Passwort zurücksetzen</a>
+            <p>Der Link ist 15 Minuten gültig und kann nur einmal verwendet werden.</p>
+            <p>Falls du diese Anfrage nicht gestellt hast, kannst du diese Mail ignorieren.</p>
+        `,
+    });
+};

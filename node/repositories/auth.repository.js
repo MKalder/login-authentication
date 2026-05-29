@@ -55,6 +55,37 @@ const verifyUser = async (user_id) => {
     );
 };
 
+const createPasswordResetToken = async (user_id, token_hash, expires_at) => {
+    await db.query(
+        'INSERT INTO password_reset_tokens (user_id, token_hash, expires_at) VALUES ($1, $2, $3)',
+        [user_id, token_hash, expires_at]
+    );
+};
+
+const findPasswordResetToken = async (token_hash) => {
+    const result = await db.query(
+        `SELECT id, user_id, expires_at, used_at
+         FROM password_reset_tokens
+         WHERE token_hash = $1`,
+        [token_hash]
+    );
+    return result.rows[0] || null;
+};
+
+const updatePassword = async (user_id, password_hash) => {
+    await db.query(
+        'UPDATE users SET password_hash = $1 WHERE id = $2',
+        [password_hash, user_id]
+    );
+};
+
+const markResetTokenAsUsed = async (token_id) => {
+    await db.query(
+        'UPDATE password_reset_tokens SET used_at = NOW() WHERE id = $1',
+        [token_id]
+    );
+};
+
 export default {
     findUserByEmail,
     createUser,
@@ -62,5 +93,10 @@ export default {
     findVerificationToken,
     markTokenAsUsed,
     verifyUser,
-    findUserById
+    findUserById,
+    createPasswordResetToken,
+    findPasswordResetToken,
+    updatePassword,
+    markResetTokenAsUsed,
 };
+

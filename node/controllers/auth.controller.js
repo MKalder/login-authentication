@@ -83,4 +83,52 @@ const me = async (req, res) => {
     }
 };
 
-export default { register, verifyEmail, login, me };
+const forgotPassword = async (req, res) => {
+    const { email } = req.body;
+
+    if (!email) {
+        return res.status(400).json({ error: 'E-Mail ist erforderlich.' });
+    }
+
+    try {
+        await authService.forgotPassword(email);
+        // Immer gleiche Antwort — User-Enumeration verhindern
+        return res.status(200).json({
+            message: 'Falls diese E-Mail registriert ist, wurde ein Reset-Link gesendet.',
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Serverfehler.' });
+    }
+};
+
+const resetPassword = async (req, res) => {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+        return res.status(400).json({ error: 'Token und neues Passwort sind erforderlich.' });
+    }
+
+    if (newPassword.length < 8) {
+        return res.status(400).json({ error: 'Passwort muss mindestens 8 Zeichen haben.' });
+    }
+
+    try {
+        await authService.resetPassword(token, newPassword);
+        return res.status(200).json({ message: 'Passwort erfolgreich zurückgesetzt.' });
+    } catch (err) {
+        if (err.message === 'TOKEN_INVALID') {
+            return res.status(400).json({ error: 'Ungültiger Token.' });
+        }
+        if (err.message === 'TOKEN_USED') {
+            return res.status(400).json({ error: 'Token wurde bereits verwendet.' });
+        }
+        if (err.message === 'TOKEN_EXPIRED') {
+            return res.status(400).json({ error: 'Token abgelaufen.' });
+        }
+        console.error(err);
+        return res.status(500).json({ error: 'Serverfehler.' });
+    }
+};
+
+export default { register, verifyEmail, login, me, forgotPassword, resetPassword };
