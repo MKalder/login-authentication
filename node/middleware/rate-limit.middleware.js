@@ -6,7 +6,7 @@ const rateLimitMessage = (windowMs, max) => ({
 
 export const registerLimiter = rateLimit({
     windowMs: 60 * 60 * 1000,
-    limit: 5, // ← max → limit
+    limit: 5,
     message: rateLimitMessage(60 * 60 * 1000, 5),
     standardHeaders: true,
     legacyHeaders: false,
@@ -14,7 +14,7 @@ export const registerLimiter = rateLimit({
 
 export const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    limit: 10, // ← max → limit
+    limit: 10,
     message: rateLimitMessage(15 * 60 * 1000, 10),
     standardHeaders: true,
     legacyHeaders: false,
@@ -22,7 +22,7 @@ export const loginLimiter = rateLimit({
 
 export const forgotPasswordLimiter = rateLimit({
     windowMs: 60 * 60 * 1000,
-    limit: 3, // ← max → limit
+    limit: 3,
     message: rateLimitMessage(60 * 60 * 1000, 3),
     standardHeaders: true,
     legacyHeaders: false,
