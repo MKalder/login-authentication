@@ -2,7 +2,7 @@ import db from '../db/index.js';
 
 const findUserById = async (id) => {
     const result = await db.query(
-        'SELECT id, email, is_verified, created_at FROM users WHERE id = $1',
+        'SELECT id, email, password_hash, is_verified, created_at FROM users WHERE id = $1',
         [id]
     );
     return result.rows[0] || null;

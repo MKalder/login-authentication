@@ -131,4 +131,34 @@ const resetPassword = async (req, res) => {
     }
 };
 
-export default { register, verifyEmail, login, me, forgotPassword, resetPassword };
+const changePassword = async (req, res) => {
+    const { oldPassword, newPassword } = req.body;
+
+    if (!oldPassword || !newPassword) {
+        return res.status(400).json({ error: 'Altes und neues Passwort sind erforderlich.' });
+    }
+
+    if (newPassword.length < 8) {
+        return res.status(400).json({ error: 'Passwort muss mindestens 8 Zeichen haben.' });
+    }
+
+    try {
+        await authService.changePassword(req.user.userId, oldPassword, newPassword);
+        return res.status(200).json({ message: 'Passwort erfolgreich geändert.' });
+    } catch (err) {
+        if (err.message === 'INVALID_PASSWORD') {
+            return res.status(401).json({ error: 'Altes Passwort ist falsch.' });
+        }
+        if (err.message === 'SAME_PASSWORD') {
+            return res.status(400).json({ error: 'Neues Passwort muss sich vom alten unterscheiden.' });
+        }
+        if (err.message === 'USER_NOT_FOUND') {
+            return res.status(404).json({ error: 'User nicht gefunden.' });
+        }
+        console.error(err);
+        return res.status(500).json({ error: 'Serverfehler.' });
+    }
+};
+
+export default { register, verifyEmail, login, me, forgotPassword, resetPassword, changePassword };
+

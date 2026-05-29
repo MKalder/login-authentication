@@ -130,6 +130,31 @@ const resetPassword = async (rawToken, newPassword) => {
     await authRepository.markResetTokenAsUsed(token.id);
 };
 
-export default { register, verifyEmail, login, me, forgotPassword, resetPassword };
+const changePassword = async (userId, oldPassword, newPassword) => {
+    // 1. User laden
+    const user = await authRepository.findUserById(userId);
+    if (!user) {
+        throw new Error('USER_NOT_FOUND');
+    }
+
+    // 2. Altes Passwort prüfen
+    const isValid = await bcrypt.compare(oldPassword, user.password_hash);
+    if (!isValid) {
+        throw new Error('INVALID_PASSWORD');
+    }
+
+    // 3. Neues Passwort darf nicht gleich dem alten sein
+    const isSame = await bcrypt.compare(newPassword, user.password_hash);
+    if (isSame) {
+        throw new Error('SAME_PASSWORD');
+    }
+
+    // 4. Neues Passwort hashen und speichern
+    const password_hash = await bcrypt.hash(newPassword, 12);
+    await authRepository.updatePassword(userId, password_hash);
+};
+
+export default { register, verifyEmail, login, me, forgotPassword, resetPassword, changePassword };
+
 
 
