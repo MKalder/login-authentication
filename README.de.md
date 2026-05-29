@@ -176,6 +176,21 @@ POST /reset-password
 
 ---
 
+## ⚙️ Passwort ändern
+
+```txt
+POST /auth/change-password  (geschützt — Auth Middleware)
+  → oldPassword + newPassword aus Body lesen
+  → User per req.user.userId aus DB laden
+  → bcrypt.compare(oldPassword, password_hash) → falsch? → 401
+  → newPassword === oldPassword? → 400 (kein Unterschied)
+  → bcrypt.hash(newPassword, 12)
+  → users.password_hash aktualisieren
+  → 200 — JWT bleibt gültig, Nutzer bleibt eingeloggt
+```
+
+---
+
 # 💾 Speicherung von Tokens in Web-Apps
 
 Zur Vollständigkeit: In einer Web-App gibt es drei gängige Optionen, einen Token zu speichern.
