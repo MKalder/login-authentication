@@ -1,5 +1,12 @@
 import authService from '../services/auth.service.js';
 
+const COOKIE_OPTIONS = {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'none',
+    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 Tage
+};
+
 const register = async (req, res) => {
     const { email, password } = req.body;
 
@@ -137,7 +144,7 @@ const changePassword = async (req, res) => {
     }
 };
 
-// login anpassen
+
 const login = async (req, res) => {
     const { email, password } = req.body;
 
@@ -147,7 +154,12 @@ const login = async (req, res) => {
 
     try {
         const { accessToken, refreshToken, user } = await authService.login(email, password);
-        return res.status(200).json({ accessToken, refreshToken, user });
+
+        // Refresh Token als HTTPOnly Cookie setzen
+        res.cookie('refreshToken', refreshToken, COOKIE_OPTIONS);
+
+        // Access Token im Body zurückgeben
+        return res.status(200).json({ accessToken, user });
     } catch (err) {
         if (err.message === 'INVALID_CREDENTIALS') {
             return res.status(401).json({ error: 'E-Mail oder Passwort falsch.' });
@@ -160,38 +172,34 @@ const login = async (req, res) => {
     }
 };
 
-// refresh
 const refresh = async (req, res) => {
-    const { refreshToken } = req.body;
+    // Refresh Token aus Cookie lesen — nicht aus Body
+    const refreshToken = req.cookies.refreshToken;
 
     if (!refreshToken) {
-        return res.status(400).json({ error: 'Refresh Token ist erforderlich.' });
+        return res.status(401).json({ error: 'Kein Refresh Token vorhanden.' });
     }
 
     try {
         const { accessToken } = await authService.refresh(refreshToken);
         return res.status(200).json({ accessToken });
     } catch (err) {
-        if (err.message === 'TOKEN_INVALID') {
-            return res.status(401).json({ error: 'Ungültiger Refresh Token.' });
-        }
-        if (err.message === 'TOKEN_REVOKED') {
-            return res.status(401).json({ error: 'Refresh Token wurde widerrufen.' });
-        }
-        if (err.message === 'TOKEN_EXPIRED') {
-            return res.status(401).json({ error: 'Refresh Token abgelaufen.' });
-        }
+        if (err.message === 'TOKEN_INVALID') return res.status(401).json({ error: 'Ungültiger Refresh Token.' });
+        if (err.message === 'TOKEN_REVOKED') return res.status(401).json({ error: 'Refresh Token wurde widerrufen.' });
+        if (err.message === 'TOKEN_EXPIRED') return res.status(401).json({ error: 'Refresh Token abgelaufen.' });
         console.error(err);
         return res.status(500).json({ error: 'Serverfehler.' });
     }
 };
 
-// logout
 const logout = async (req, res) => {
-    const { refreshToken } = req.body;
+    const refreshToken = req.cookies.refreshToken;
+
+    // Cookie löschen — auch wenn kein Token vorhanden
+    res.clearCookie('refreshToken', COOKIE_OPTIONS);
 
     if (!refreshToken) {
-        return res.status(400).json({ error: 'Refresh Token ist erforderlich.' });
+        return res.status(200).json({ message: 'Erfolgreich ausgeloggt.' });
     }
 
     try {

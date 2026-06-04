@@ -14,3 +14,5 @@ export const SMTP_USER = process.env.SMTP_USER;
 export const SMTP_PASS = process.env.SMTP_PASS;
 export const MAIL_FROM = process.env.MAIL_FROM;
 export const APP_URL = process.env.APP_URL;
+export const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS || '';
+
