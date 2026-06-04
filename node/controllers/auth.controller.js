@@ -47,29 +47,6 @@ const verifyEmail = async (req, res) => {
     }
 };
 
-
-const login = async (req, res) => {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-        return res.status(400).json({ error: 'E-Mail and Passwort are required.' });
-    }
-
-    try {
-        const { token, user } = await authService.login(email, password);
-        return res.status(200).json({ token, user });
-    } catch (err) {
-        if (err.message === 'INVALID_CREDENTIALS') {
-            return res.status(401).json({ error: 'E-Mail or Password incorrect.' });
-        }
-        if (err.message === 'EMAIL_NOT_VERIFIED') {
-            return res.status(403).json({ error: 'E-Mail has not been activated.' });
-        }
-        console.error(err);
-        return res.status(500).json({ error: 'Error.' });
-    }
-};
-
 const me = async (req, res) => {
     try {
         const user = await authService.me(req.user.userId);
@@ -160,5 +137,82 @@ const changePassword = async (req, res) => {
     }
 };
 
-export default { register, verifyEmail, login, me, forgotPassword, resetPassword, changePassword };
+// login anpassen
+const login = async (req, res) => {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+        return res.status(400).json({ error: 'E-Mail und Passwort sind erforderlich.' });
+    }
+
+    try {
+        const { accessToken, refreshToken, user } = await authService.login(email, password);
+        return res.status(200).json({ accessToken, refreshToken, user });
+    } catch (err) {
+        if (err.message === 'INVALID_CREDENTIALS') {
+            return res.status(401).json({ error: 'E-Mail oder Passwort falsch.' });
+        }
+        if (err.message === 'EMAIL_NOT_VERIFIED') {
+            return res.status(403).json({ error: 'E-Mail noch nicht bestätigt.' });
+        }
+        console.error(err);
+        return res.status(500).json({ error: 'Serverfehler.' });
+    }
+};
+
+// refresh
+const refresh = async (req, res) => {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+        return res.status(400).json({ error: 'Refresh Token ist erforderlich.' });
+    }
+
+    try {
+        const { accessToken } = await authService.refresh(refreshToken);
+        return res.status(200).json({ accessToken });
+    } catch (err) {
+        if (err.message === 'TOKEN_INVALID') {
+            return res.status(401).json({ error: 'Ungültiger Refresh Token.' });
+        }
+        if (err.message === 'TOKEN_REVOKED') {
+            return res.status(401).json({ error: 'Refresh Token wurde widerrufen.' });
+        }
+        if (err.message === 'TOKEN_EXPIRED') {
+            return res.status(401).json({ error: 'Refresh Token abgelaufen.' });
+        }
+        console.error(err);
+        return res.status(500).json({ error: 'Serverfehler.' });
+    }
+};
+
+// logout
+const logout = async (req, res) => {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+        return res.status(400).json({ error: 'Refresh Token ist erforderlich.' });
+    }
+
+    try {
+        await authService.logout(refreshToken);
+        return res.status(200).json({ message: 'Erfolgreich ausgeloggt.' });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Serverfehler.' });
+    }
+};
+
+export default {
+    register,
+    verifyEmail,
+    login,
+    me,
+    forgotPassword,
+    resetPassword,
+    changePassword,
+    refresh,
+    logout,
+};
+
 

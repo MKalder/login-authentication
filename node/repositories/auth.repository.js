@@ -86,17 +86,52 @@ const markResetTokenAsUsed = async (token_id) => {
     );
 };
 
+const createRefreshToken = async (user_id, token_hash, expires_at) => {
+    await db.query(
+        'INSERT INTO refresh_tokens (user_id, token_hash, expires_at) VALUES ($1, $2, $3)',
+        [user_id, token_hash, expires_at]
+    );
+};
+
+const findRefreshToken = async (token_hash) => {
+    const result = await db.query(
+        `SELECT id, user_id, expires_at, revoked_at
+         FROM refresh_tokens
+         WHERE token_hash = $1`,
+        [token_hash]
+    );
+    return result.rows[0] || null;
+};
+
+const revokeRefreshToken = async (token_hash) => {
+    await db.query(
+        'UPDATE refresh_tokens SET revoked_at = NOW() WHERE token_hash = $1',
+        [token_hash]
+    );
+};
+
+const revokeAllRefreshTokens = async (user_id) => {
+    await db.query(
+        'UPDATE refresh_tokens SET revoked_at = NOW() WHERE user_id = $1 AND revoked_at IS NULL',
+        [user_id]
+    );
+};
+
 export default {
     findUserByEmail,
+    findUserById,
     createUser,
     createVerificationToken,
     findVerificationToken,
     markTokenAsUsed,
     verifyUser,
-    findUserById,
     createPasswordResetToken,
     findPasswordResetToken,
     updatePassword,
     markResetTokenAsUsed,
+    createRefreshToken,
+    findRefreshToken,
+    revokeRefreshToken,
+    revokeAllRefreshTokens,
 };
 
