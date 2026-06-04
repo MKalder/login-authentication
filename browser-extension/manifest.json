@@ -1,14 +1,12 @@
 {
   "manifest_version": 3,
-  "name": "Login Authentication MVP",
-  "version": "1.0",
-  "description": "Register & Login",
-  "permissions": ["activeTab", "scripting", "storage", "contextMenus"],
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["content.js"]
-    }
-  ],
-  "action": {}
+  "name": "Auth MVP",
+  "version": "1.0.0",
+  "description": "Login MVP — JWT Auth Browser Extension",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Auth MVP"
+  },
+  "permissions": ["storage", "cookies"],
+  "host_permissions": ["https://login-mvp.prodowner.de/*"]
 }
