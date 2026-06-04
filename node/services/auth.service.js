@@ -56,33 +56,6 @@ const verifyEmail = async (raw_token) => {
     await authRepository.markTokenAsUsed(token.id);
 };
 
-const login = async (email, password) => {
-    // 1. Search user
-    const user = await authRepository.findUserByEmail(email);
-    if (!user) {
-        throw new Error('INVALID_CREDENTIALS');
-    }
-
-    // 2. E-Mail verified?
-    if (!user.is_verified) {
-        throw new Error('EMAIL_NOT_VERIFIED');
-    }
-
-    // 3. Password check
-    const isValid = await bcrypt.compare(password, user.password_hash);
-    if (!isValid) {
-        throw new Error('INVALID_CREDENTIALS');
-    }
-
-    // 4. Create JWT 
-    const token = jwt.sign(
-        { userId: user.id, email: user.email },
-        JWT_SECRET,
-        { expiresIn: '15m' }
-    );
-
-    return { token, user: { id: user.id, email: user.email } };
-};
 
 const me = async (userId) => {
     const user = await authRepository.findUserById(userId);
@@ -154,7 +127,78 @@ const changePassword = async (userId, oldPassword, newPassword) => {
     await authRepository.updatePassword(userId, password_hash);
 };
 
-export default { register, verifyEmail, login, me, forgotPassword, resetPassword, changePassword };
+// login anpassen — Refresh Token zusätzlich erstellen
+const login = async (email, password) => {
+    const user = await authRepository.findUserByEmail(email);
+    if (!user) throw new Error('INVALID_CREDENTIALS');
+
+    if (!user.is_verified) throw new Error('EMAIL_NOT_VERIFIED');
+
+    const isValid = await bcrypt.compare(password, user.password_hash);
+    if (!isValid) throw new Error('INVALID_CREDENTIALS');
+
+    // Access Token — kurzlebig
+    const accessToken = jwt.sign(
+        { userId: user.id, email: user.email },
+        JWT_SECRET,
+        { expiresIn: '15m' }
+    );
+
+    // Refresh Token — langlebig, in DB gespeichert
+    const rawRefreshToken = crypto.randomBytes(32).toString('hex');
+    const refreshTokenHash = crypto.createHash('sha256').update(rawRefreshToken).digest('hex');
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 Tage
+
+    await authRepository.createRefreshToken(user.id, refreshTokenHash, expiresAt);
+
+    return {
+        accessToken,
+        refreshToken: rawRefreshToken,
+        user: { id: user.id, email: user.email },
+    };
+};
+
+// Refresh — neuer Access Token gegen Refresh Token
+const refresh = async (rawRefreshToken) => {
+    const tokenHash = crypto.createHash('sha256').update(rawRefreshToken).digest('hex');
+
+    const token = await authRepository.findRefreshToken(tokenHash);
+    if (!token) throw new Error('TOKEN_INVALID');
+
+    if (token.revoked_at) throw new Error('TOKEN_REVOKED');
+
+    if (new Date() > new Date(token.expires_at)) throw new Error('TOKEN_EXPIRED');
+
+    const user = await authRepository.findUserById(token.user_id);
+    if (!user) throw new Error('USER_NOT_FOUND');
+
+    const accessToken = jwt.sign(
+        { userId: user.id, email: user.email },
+        JWT_SECRET,
+        { expiresIn: '15m' }
+    );
+
+    return { accessToken };
+};
+
+// Logout — Refresh Token widerrufen
+const logout = async (rawRefreshToken) => {
+    const tokenHash = crypto.createHash('sha256').update(rawRefreshToken).digest('hex');
+    await authRepository.revokeRefreshToken(tokenHash);
+};
+
+export default {
+    register,
+    verifyEmail,
+    login,
+    me,
+    forgotPassword,
+    resetPassword,
+    changePassword,
+    refresh,
+    logout,
+};
+
 
 
 
